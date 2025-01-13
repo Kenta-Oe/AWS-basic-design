@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 環境設定
+.env
+secrets.py
+
+# IDE
+.vscode/
+.idea/
+
+# 出力ファイル
+*.docx
