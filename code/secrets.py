@@ -1,0 +1,1 @@
+OPENAI_API_KEY = ""  # API keyは別途設定してください
