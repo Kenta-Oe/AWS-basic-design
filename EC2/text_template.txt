@@ -1,1 +1,109 @@
-IyDln7rooYzplovlrZDjga7ovrzjgb/mlrnjgILku6XkuIvjga7jg6Hjg4Pjgrvjg7zjgrjjgpLopovjgabjgY3jgZ/jgYTjgIIKCiMjIDEuIOWHuuWKm+OCiOOBruOCueODmOOCv+ODiQotIOWFqOS9k+OBp0FXU+OBq+S7k+OBmeOCi0Jvb3RzdHJhcOioreWumuOCkuS9v+OBhuWgtOWQiAot5aSW6YOo44Ki44Kv44K744K544GL44KJ44GuU1NI5o6l57aaLOWklumDqOOBi+OCieOBruOCreODvOODmuOCouOBruWumue+qQot44Kv44Op44Km44OJ44OV44Kp44O844Og44Gu5L2c5oiQ44O7IElBTeODreODvOODq+OBruS9v+OBhui7vQotU1NI6Zai6YCj77yI5aSW6YOo44GC44KK77yJCgojIyAyLiBWUEPjga7lh6bnkIYK4oGjIFZQQ+OBruWHuuWKm+agt+W8jwotIFNTSOWIqeeUqOOBruacgOWwj+mZkOOBruihjOS4uwoKIyMgMy4g44Ko44Oz44OJ44Od44Kk44Oz44OI44KS5YWl44KL5aC05ZCICi0g44K/44K544Kv44Ki44OX44Ot44OR44OG44Kj44KS5L+d57Si44GZ44KL44Go5a2Y5Zyo44GZ44KL5aC05ZCICi0g44Ko44Oz44OJ44Od44Kk44Oz44OI44KS5YWl44KM44KL5YWI44Gr44K/44K544Kv44GM5b6M44GK44KL44GT44Go44KS56K66KqNCi0g44K/44K544Kv44OV44Kp44O844K544KS44OB44Kn44OD44Kv44GZ44KLCgojIyA0LiBBV1PjgpLmoLzntI3jgZnjgovopoHku7bjgb/mgKfCt+OBrumAmuW4uAotIOOBk+OBruS7u+WKoeOBruODqeOCpOODluODqeODquODvOOBq2hvYmnpm4bjgpLlhaXjgozjgotIT1TVusYK
+================================================
+【EC2導入ヒアリングシート（用途/OS拡張 + ファミリー分割）】
+================================================
+
+■ 1. 基本情報
+- プロジェクト名：ゴムバンド量産計画
+- 要件担当者：すだれ三郎
+
+■ 2. 用途（選択式：当てはまるものに✔）
+  [ ] Webアプリ(大規模)       ※ 多数のアクセスを想定
+  [ ] Webアプリ(小～中規模)    ※ テスト/開発/比較的低トラフィック
+  [x] バッチ処理              ※ 定期的に大量データを処理 
+  [ ] テスト/検証用           ※ ステージング/PoC 
+  [ ] ゲームサーバ            ※ 低遅延・高同時接続が必要
+  [ ] データ分析系            ※ メモリやCPUを多く消費 
+  [x] Windowsアプリ           ※ Windows Server上で動作 
+  [ ] GPU要件                 ※ 機械学習/3Dレンダリング 
+  [ ] HPC(ハイパフォーマンス)  ※ 並列計算/高負荷計算
+  [x] その他：自作音声認識ツールの実行
+
+■ 3. 希望OS（複数選択可）
+  [x] Amazon Linux         ※ AWS標準
+  [ ] Ubuntu               ※ コミュニティ広い
+  [x] Windows Server       ※ Windowsアプリ/ドメイン連携
+  [ ] Red Hat Enterprise Linux(RHEL)  ※ エンタープライズサポート
+  [ ] SUSE Linux Enterprise Server    ※ SAP等で実績
+  [ ] CentOS(旧系)         ※ EOLに留意
+  [ ] Debian               ※ 安定・軽量
+  [ ] AlmaLinux / RockyLinux   ※ RHEL互換
+  [ ] その他：-------------------------
+
+■ 4. インスタンス数 / スケーリング
+- 初期台数：7 台
+- スケーリング要望：
+  [x] オートスケーリング         ※ 負荷変動対応
+  [ ] 固定台数                  ※ 常時同じ数
+  [ ] 未定（後で検討）
+
+■ 5. インスタンスタイプ（vCPU / メモリ希望）
+★ ファミリー別にチェック（複数可 / 検討）
+  - Tファミリー (t2/t3/t4g等)
+    [x] T系を希望    ※ バースト性能・コスト重視
+  - Mファミリー (m5/m6g等)
+    [ ] M系を希望    ※ 汎用(バランス型)
+  - Cファミリー (c5/c6g等)
+    [ ] C系を希望    ※ CPU重視(計算集中)
+  - Rファミリー (r5/r6g等)
+    [x] R系を希望    ※ メモリ重視(データ保持が多い)
+  - Dファミリー (m5d/c5d等)
+    [ ] D系を希望    ※ インスタンスストア付き
+  - G/Pファミリー (g4/p3等)
+    [ ] GPUインスタンス  ※ 機械学習/3Dレンダリング
+  - その他 or 未定：なし
+
+■ 6. ストレージ要件
+- EBSタイプ：
+  [x] gp2/gp3(汎用SSD)           ※ バランス良い
+  [ ] io1/io2(IOPS重視)          ※ 高IOPS
+  [ ] HDD(st1/sc1)              ※ 大容量
+  [ ] 未定
+- 容量(GB)：2023 (おおよそ)
+
+■ 7. ネットワーク / セキュリティ
+- VPC：
+  [x] 新規VPC( CIDR：192.168.0.0/16 )   ※ 独立プロジェクト
+  [ ] 既存VPC( VPC ID：vpc-xxxx )       ※ 既存インフラに組み込み
+- パブリックIP：
+  [ ] 割り当てる         ※ インターネットから直接アクセス
+  [x] 割り当てない       ※ プライベートのみ
+- セキュリティグループ(簡易)：
+  [x] SSH(22) from 10.0.0.0/8    ※ 運用接続
+  [ ] RDP(3389) from _______
+  [ ] HTTP(80)/HTTPS(443)
+  [x] 未定 or その他：ポート25000(TCP)だけ空ける予定
+
+■ 8. 可用性
+- AZ配置：
+  [ ] 単一AZ
+  [x] マルチAZ               ※ 耐障害性向上
+  [ ] ASGマルチAZ            ※ スケール＆高可用性
+- SLA/可用性要件：ダウンは1時間/週まで許容
+
+■ 9. 運用 / モニタリング
+- CloudWatchメトリクス：
+  [x] 標準(CPU/ネットワーク)     ※ デフォルト
+  [ ] カスタム(メモリ等)         ※ OSレベルAgent
+  [ ] 未定
+- OSログ収集：
+  [x] CloudWatch Logs          ※ ログ集約
+  [ ] 他ツール / エージェント   ※ Splunk/Datadog等
+  [ ] 未定
+- バックアップ：
+  [x] EBSスナップ(定期)        ※ 最低限のバックアップ
+  [ ] AWS Backup
+  [ ] その他 or 未定：--------
+
+■ 10. コスト関連
+- 課金形態：
+  [ ] オンデマンド
+  [ ] リザーブド or Savings Plans
+  [x] スポット                ※ 中断許容で大幅安
+  [ ] 未定
+- 月間予算目安：100,000円以内
+
+■ 11. その他の要望
+- できるだけパワーを抑えてバッチ処理をまとめ実行したい
+- Windowsサーバーはテスト用に1台欲しいが、他はLinuxでOK
+- **一般的な仕様にはこだわらない方針**（独自要件重視）
+-----------------------------------------
