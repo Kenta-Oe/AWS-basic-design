@@ -3,7 +3,7 @@
 OpenAI APIを使って、
 1) 最新AI事情のラジオ台本を生成し、
 2) タイトルをファイル名にした台本テキストを保存し、
-3) OpenAI Text-to-Speechで音声ファイル(mp3)を出力します。
+3) OpenAI Text-to-Speechで生成した音声をMP4動画に変換して出力します。
 
 ## ファイル構造
 
@@ -12,7 +12,7 @@ C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\
 ├── api_config.py                # APIキー読込専用(メイン処理と分離)
 ├── generate_radio_assets.py     # 台本生成 + 音声生成のメイン処理
 ├── scripts/                     # タイトル名ベースの台本テキスト
-└── audio/                       # タイトル名ベースの音声(mp3)
+└── audio/                       # タイトル名ベースの動画(mp4)
 ```
 
 ## セキュリティ方針
@@ -36,6 +36,8 @@ OPENAI_API_KEY=sk-your-api-key-here
    pip install openai
    ```
 
+   MP4変換に `ffmpeg` が必要です（PATHが通っている状態）。
+
 2. APIキーを `.env` に設定（推奨）
    - `code/radio/.env` の `OPENAI_API_KEY` を更新
 
@@ -56,7 +58,7 @@ OPENAI_API_KEY=sk-your-api-key-here
    python generate_radio_assets.py --topic "最新のAI事情" --minutes 8
    ```
 
-4-2. 既存の台本テキストを引数で渡してMP3化
+4-2. 既存の台本テキストを引数で渡してMP4化
    ```bash
    cd "C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio"
    python generate_radio_assets.py --script-file "scripts\任意の台本ファイル.txt"
@@ -64,9 +66,9 @@ OPENAI_API_KEY=sk-your-api-key-here
 
 5. 生成物を確認
    - 台本: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\scripts\*.txt`
-   - 音声: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\audio\*.mp3`
+   - 動画: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\audio\*.mp4`
 
-※ `--script-file` 指定時は、指定したテキストファイルを読み込んで同名のmp3を `audio/` に出力します。
+※ `--script-file` 指定時は、指定したテキストファイルを読み込んで同名のmp4を `audio/` に出力します。
 
 ## 台本の話すテンポについて
 

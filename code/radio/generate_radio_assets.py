@@ -2,6 +2,7 @@ import argparse
 import datetime
 import json
 import re
+import subprocess
 from pathlib import Path
 
 from api_config import get_openai_client
@@ -94,6 +95,37 @@ def synthesize_tts(script_text: str, output_audio_path: Path) -> None:
         response.stream_to_file(str(output_audio_path))
 
 
+def convert_audio_to_mp4(audio_path: Path, video_path: Path) -> None:
+    """音声ファイルを黒背景付きのMP4動画へ変換します。"""
+    command = [
+        "ffmpeg",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=black:s=1280x720:r=30",
+        "-i",
+        str(audio_path),
+        "-shortest",
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        str(video_path),
+    ]
+
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except FileNotFoundError as e:
+        raise RuntimeError(
+            "ffmpeg が見つかりません。MP4出力には ffmpeg のインストールが必要です。"
+        ) from e
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"ffmpeg でMP4変換に失敗しました: {e.stderr}") from e
+
+
 def load_script_text(script_file: Path) -> str:
     """テキストファイルから読み上げ本文を読み込みます。"""
     if not script_file.exists():
@@ -113,22 +145,25 @@ def load_script_text(script_file: Path) -> str:
     return script_text
 
 
-def create_audio_from_script_file(script_file: Path, dry_run: bool = False) -> Path | None:
+def create_video_from_script_file(script_file: Path, dry_run: bool = False) -> Path | None:
     script_text = load_script_text(script_file)
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     audio_path = AUDIO_DIR / f"{script_file.stem}.mp3"
+    video_path = AUDIO_DIR / f"{script_file.stem}.mp4"
 
     if dry_run:
         return None
 
     synthesize_tts(script_text=script_text, output_audio_path=audio_path)
-    return audio_path
+    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path)
+    audio_path.unlink(missing_ok=True)
+    return video_path
 
 
 def run(topic: str, minutes: int, dry_run: bool = False, script_file: Path | None = None) -> tuple[Path | None, Path | None]:
     if script_file:
-        audio_path = create_audio_from_script_file(script_file=script_file, dry_run=dry_run)
-        return script_file, audio_path
+        video_path = create_video_from_script_file(script_file=script_file, dry_run=dry_run)
+        return script_file, video_path
 
     if dry_run:
         title = "【サンプル】最新AIニュースラジオ"
@@ -144,19 +179,23 @@ def run(topic: str, minutes: int, dry_run: bool = False, script_file: Path | Non
         return script_path, None
 
     audio_name = script_path.stem + ".mp3"
+    video_name = script_path.stem + ".mp4"
     audio_path = AUDIO_DIR / audio_name
+    video_path = AUDIO_DIR / video_name
     synthesize_tts(script_text=script, output_audio_path=audio_path)
-    return script_path, audio_path
+    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path)
+    audio_path.unlink(missing_ok=True)
+    return script_path, video_path
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="ラジオ台本生成 + TTS音声化")
+    parser = argparse.ArgumentParser(description="ラジオ台本生成 + TTSでMP4動画化")
     parser.add_argument("--topic", default="最新のAI事情", help="番組のテーマ")
     parser.add_argument("--minutes", type=int, default=8, help="番組時間(分)")
     parser.add_argument(
         "--script-file",
         type=Path,
-        help="mp3化したい台本テキストファイルのパス。指定時はこのファイルから音声を作成",
+        help="MP4化したい台本テキストファイルのパス。指定時はこのファイルから動画を作成",
     )
     parser.add_argument("--dry-run", action="store_true", help="APIを呼ばずにファイル生成テスト")
     return parser.parse_args()
@@ -164,7 +203,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    script_path, audio_path = run(
+    script_path, video_path = run(
         topic=args.topic,
         minutes=args.minutes,
         dry_run=args.dry_run,
@@ -173,10 +212,10 @@ def main() -> None:
 
     if script_path:
         print(f"[OK] 台本ファイル: {script_path}")
-    if audio_path:
-        print(f"[OK] 音声ファイル: {audio_path}")
+    if video_path:
+        print(f"[OK] 動画ファイル: {video_path}")
     else:
-        print("[INFO] dry-run のため音声生成はスキップしました。")
+        print("[INFO] dry-run のため動画生成はスキップしました。")
 
 
 if __name__ == "__main__":
