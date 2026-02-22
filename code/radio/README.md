@@ -11,9 +11,8 @@ OpenAI APIを使って、
 C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\
 ├── api_config.py                # APIキー読込専用(メイン処理と分離)
 ├── generate_radio_assets.py     # 台本生成 + 音声生成のメイン処理
-└── output/
-    ├── scripts/                 # タイトル名ベースの台本テキスト
-    └── audio/                   # タイトル名ベースの音声(mp3)
+├── scripts/                     # タイトル名ベースの台本テキスト
+└── audio/                       # タイトル名ベースの音声(mp3)
 ```
 
 ## セキュリティ方針
@@ -58,5 +57,10 @@ OPENAI_API_KEY=sk-your-api-key-here
    ```
 
 5. 生成物を確認
-   - 台本: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\output\scripts\*.txt`
-   - 音声: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\output\audio\*.mp3`
+   - 台本: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\scripts\*.txt`
+   - 音声: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\audio\*.mp3`
+
+## 台本の話すテンポについて
+
+- 台本生成プロンプトに、聞き取りやすい中速テンポ・文を短めに区切る指示を追加しています。
+- 重要ポイントの前後で短い間を取りやすい文構成になるよう調整しています。

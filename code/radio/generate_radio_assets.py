@@ -10,10 +10,9 @@ SCRIPT_MODEL = "gpt-4.1-mini"
 TTS_MODEL = "gpt-4o-mini-tts"
 TTS_VOICE = "alloy"
 
-BASE_DIR = Path(r"C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio")
-OUTPUT_ROOT = BASE_DIR / "output"
-SCRIPT_DIR = OUTPUT_ROOT / "scripts"
-AUDIO_DIR = OUTPUT_ROOT / "audio"
+BASE_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = BASE_DIR / "scripts"
+AUDIO_DIR = BASE_DIR / "audio"
 
 
 def sanitize_filename(title: str) -> str:
@@ -37,6 +36,8 @@ def build_prompt(topic: str, minutes: int) -> str:
 - 形式: 一人語り
 - トーン: 誠実でわかりやすい
 - 内容: 最新トレンド、実務活用、注意点(セキュリティ/倫理)、今後の展望
+- 話すテンポ: 聞き取りやすい中速。重要点の前後で短い間(1拍)が取れるよう、文を短めに区切る
+- 読み上げやすさ: 1文を長くしすぎず、句読点を適切に入れる
 
 必ずJSONで返し、次のキーのみを含めてください:
 {{

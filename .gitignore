@@ -15,4 +15,5 @@ secrets.py
 # Output files
 *.docx
 # Radio generator outputs
-code/radio/output/
+code/radio/scripts/
+code/radio/audio/
