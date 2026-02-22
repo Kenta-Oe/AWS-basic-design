@@ -94,7 +94,42 @@ def synthesize_tts(script_text: str, output_audio_path: Path) -> None:
         response.stream_to_file(str(output_audio_path))
 
 
-def run(topic: str, minutes: int, dry_run: bool = False) -> tuple[Path, Path | None]:
+def load_script_text(script_file: Path) -> str:
+    """テキストファイルから読み上げ本文を読み込みます。"""
+    if not script_file.exists():
+        raise FileNotFoundError(f"台本ファイルが見つかりません: {script_file}")
+
+    raw = script_file.read_text(encoding="utf-8").strip()
+    lines = raw.splitlines()
+
+    if lines and lines[0].startswith("タイトル:"):
+        lines = lines[1:]
+        while lines and not lines[0].strip():
+            lines.pop(0)
+
+    script_text = "\n".join(lines).strip()
+    if not script_text:
+        raise ValueError(f"台本ファイルの本文が空です: {script_file}")
+    return script_text
+
+
+def create_audio_from_script_file(script_file: Path, dry_run: bool = False) -> Path | None:
+    script_text = load_script_text(script_file)
+    AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+    audio_path = AUDIO_DIR / f"{script_file.stem}.mp3"
+
+    if dry_run:
+        return None
+
+    synthesize_tts(script_text=script_text, output_audio_path=audio_path)
+    return audio_path
+
+
+def run(topic: str, minutes: int, dry_run: bool = False, script_file: Path | None = None) -> tuple[Path | None, Path | None]:
+    if script_file:
+        audio_path = create_audio_from_script_file(script_file=script_file, dry_run=dry_run)
+        return script_file, audio_path
+
     if dry_run:
         title = "【サンプル】最新AIニュースラジオ"
         script = "本日は最新のAI事情を、5つのポイントでわかりやすくお届けします。"
@@ -118,15 +153,26 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="ラジオ台本生成 + TTS音声化")
     parser.add_argument("--topic", default="最新のAI事情", help="番組のテーマ")
     parser.add_argument("--minutes", type=int, default=8, help="番組時間(分)")
+    parser.add_argument(
+        "--script-file",
+        type=Path,
+        help="mp3化したい台本テキストファイルのパス。指定時はこのファイルから音声を作成",
+    )
     parser.add_argument("--dry-run", action="store_true", help="APIを呼ばずにファイル生成テスト")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    script_path, audio_path = run(topic=args.topic, minutes=args.minutes, dry_run=args.dry_run)
+    script_path, audio_path = run(
+        topic=args.topic,
+        minutes=args.minutes,
+        dry_run=args.dry_run,
+        script_file=args.script_file,
+    )
 
-    print(f"[OK] 台本ファイル: {script_path}")
+    if script_path:
+        print(f"[OK] 台本ファイル: {script_path}")
     if audio_path:
         print(f"[OK] 音声ファイル: {audio_path}")
     else:

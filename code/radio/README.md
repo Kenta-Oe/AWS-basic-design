@@ -56,9 +56,17 @@ OPENAI_API_KEY=sk-your-api-key-here
    python generate_radio_assets.py --topic "最新のAI事情" --minutes 8
    ```
 
+4-2. 既存の台本テキストを引数で渡してMP3化
+   ```bash
+   cd "C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio"
+   python generate_radio_assets.py --script-file "scripts\任意の台本ファイル.txt"
+   ```
+
 5. 生成物を確認
    - 台本: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\scripts\*.txt`
    - 音声: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\audio\*.mp3`
+
+※ `--script-file` 指定時は、指定したテキストファイルを読み込んで同名のmp3を `audio/` に出力します。
 
 ## 台本の話すテンポについて
 
