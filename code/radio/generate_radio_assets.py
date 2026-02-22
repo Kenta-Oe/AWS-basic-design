@@ -10,7 +10,7 @@ SCRIPT_MODEL = "gpt-4.1-mini"
 TTS_MODEL = "gpt-4o-mini-tts"
 TTS_VOICE = "alloy"
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(r"C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio")
 OUTPUT_ROOT = BASE_DIR / "output"
 SCRIPT_DIR = OUTPUT_ROOT / "scripts"
 AUDIO_DIR = OUTPUT_ROOT / "audio"
