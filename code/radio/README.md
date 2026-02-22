@@ -13,6 +13,9 @@ C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\
 ├── generate_radio_assets.py     # 台本生成 + 音声生成のメイン処理
 ├── scripts/                     # タイトル名ベースの台本テキスト
 └── audio/                       # タイトル名ベースの動画(mp4)
+
+C:\Users\takky\OneDrive\デスクトップ\code_work\AWS-basic-design\code\bgm\
+└── *.mp3                         # BGM(先頭1ファイルを使用)
 ```
 
 ## セキュリティ方針
@@ -37,6 +40,7 @@ OPENAI_API_KEY=sk-your-api-key-here
    ```
 
    MP4変換に `ffmpeg` が必要です（PATHが通っている状態）。
+   また、`code/bgm` にBGM用のmp3を置いてください（動画生成時に自動でミックス）。
 
 2. APIキーを `.env` に設定（推奨）
    - `code/radio/.env` の `OPENAI_API_KEY` を更新
@@ -69,6 +73,12 @@ OPENAI_API_KEY=sk-your-api-key-here
    - 動画: `C:\Users\takky\OneDrive\デスクトップ\code_work\code\radio\audio\*.mp4`
 
 ※ `--script-file` 指定時は、指定したテキストファイルを読み込んで同名のmp4を `audio/` に出力します。
+
+## BGMについて
+
+- BGMは `C:\Users\takky\OneDrive\デスクトップ\code_work\AWS-basic-design\code\bgm` 配下の `.mp3` を使用します。
+- BGMはループ再生され、台本の読み上げが長くても途切れないようにしています。
+- ナレーションに対してBGM音量は控えめ（約12%）に調整しています。
 
 ## 台本の話すテンポについて
 

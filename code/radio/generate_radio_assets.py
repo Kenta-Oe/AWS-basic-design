@@ -14,6 +14,7 @@ TTS_VOICE = "alloy"
 BASE_DIR = Path(__file__).resolve().parent
 SCRIPT_DIR = BASE_DIR / "scripts"
 AUDIO_DIR = BASE_DIR / "audio"
+BGM_DIR = BASE_DIR.parent / "bgm"
 
 
 def sanitize_filename(title: str) -> str:
@@ -95,8 +96,19 @@ def synthesize_tts(script_text: str, output_audio_path: Path) -> None:
         response.stream_to_file(str(output_audio_path))
 
 
-def convert_audio_to_mp4(audio_path: Path, video_path: Path) -> None:
-    """音声ファイルを黒背景付きのMP4動画へ変換します。"""
+def find_bgm_file() -> Path:
+    """BGMフォルダからmp3ファイルを1つ取得します。"""
+    if not BGM_DIR.exists():
+        raise FileNotFoundError(f"BGMフォルダが見つかりません: {BGM_DIR}")
+
+    bgm_candidates = sorted(BGM_DIR.glob("*.mp3"))
+    if not bgm_candidates:
+        raise FileNotFoundError(f"BGMフォルダにmp3がありません: {BGM_DIR}")
+    return bgm_candidates[0]
+
+
+def convert_audio_to_mp4(audio_path: Path, video_path: Path, bgm_path: Path) -> None:
+    """ナレーション音声にBGMを重ね、黒背景付きのMP4動画へ変換します。"""
     command = [
         "ffmpeg",
         "-y",
@@ -106,6 +118,16 @@ def convert_audio_to_mp4(audio_path: Path, video_path: Path) -> None:
         "color=c=black:s=1280x720:r=30",
         "-i",
         str(audio_path),
+        "-stream_loop",
+        "-1",
+        "-i",
+        str(bgm_path),
+        "-filter_complex",
+        "[1:a]volume=1.0[narr];[2:a]volume=0.12[bgm];[narr][bgm]amix=inputs=2:duration=first:dropout_transition=2[mix]",
+        "-map",
+        "0:v:0",
+        "-map",
+        "[mix]",
         "-shortest",
         "-c:v",
         "libx264",
@@ -154,8 +176,9 @@ def create_video_from_script_file(script_file: Path, dry_run: bool = False) -> P
     if dry_run:
         return None
 
+    bgm_path = find_bgm_file()
     synthesize_tts(script_text=script_text, output_audio_path=audio_path)
-    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path)
+    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path, bgm_path=bgm_path)
     audio_path.unlink(missing_ok=True)
     return video_path
 
@@ -182,8 +205,9 @@ def run(topic: str, minutes: int, dry_run: bool = False, script_file: Path | Non
     video_name = script_path.stem + ".mp4"
     audio_path = AUDIO_DIR / audio_name
     video_path = AUDIO_DIR / video_name
+    bgm_path = find_bgm_file()
     synthesize_tts(script_text=script, output_audio_path=audio_path)
-    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path)
+    convert_audio_to_mp4(audio_path=audio_path, video_path=video_path, bgm_path=bgm_path)
     audio_path.unlink(missing_ok=True)
     return script_path, video_path
 
