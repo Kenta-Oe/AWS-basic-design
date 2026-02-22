@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -14,7 +15,32 @@ TTS_VOICE = "alloy"
 BASE_DIR = Path(__file__).resolve().parent
 SCRIPT_DIR = BASE_DIR / "scripts"
 AUDIO_DIR = BASE_DIR / "audio"
-BGM_DIR = BASE_DIR.parent / "bgm"
+
+
+def get_bgm_dir_candidates() -> list[Path]:
+    """実行環境差分を吸収するため、BGMフォルダ候補を複数返します。"""
+    env_bgm_value = os.getenv("RADIO_BGM_DIR")
+    env_bgm_dir = Path(env_bgm_value).expanduser() if env_bgm_value else None
+
+    candidates = [
+        BASE_DIR.parent / "bgm",              # 例: .../code/radio -> .../code/bgm
+        BASE_DIR / "bgm",                     # 例: BASE_DIRが.../code の場合
+        BASE_DIR.parent.parent / "code" / "bgm",  # 例: BASE_DIRが.../AWS-basic-design の場合
+        BASE_DIR.parent.parent / "bgm",       # 念のため
+    ]
+
+    if env_bgm_dir:
+        candidates.insert(0, env_bgm_dir)
+
+    # 順序維持で重複除去
+    unique: list[Path] = []
+    seen = set()
+    for c in candidates:
+        key = str(c)
+        if key not in seen:
+            unique.append(c)
+            seen.add(key)
+    return unique
 
 
 def sanitize_filename(title: str) -> str:
@@ -98,13 +124,22 @@ def synthesize_tts(script_text: str, output_audio_path: Path) -> None:
 
 def find_bgm_file() -> Path:
     """BGMフォルダからmp3ファイルを1つ取得します。"""
-    if not BGM_DIR.exists():
-        raise FileNotFoundError(f"BGMフォルダが見つかりません: {BGM_DIR}")
+    searched_dirs: list[Path] = []
 
-    bgm_candidates = sorted(BGM_DIR.glob("*.mp3"))
-    if not bgm_candidates:
-        raise FileNotFoundError(f"BGMフォルダにmp3がありません: {BGM_DIR}")
-    return bgm_candidates[0]
+    for bgm_dir in get_bgm_dir_candidates():
+        searched_dirs.append(bgm_dir)
+        if not bgm_dir.exists():
+            continue
+        bgm_candidates = sorted(bgm_dir.glob("*.mp3"))
+        if bgm_candidates:
+            return bgm_candidates[0]
+
+    searched = "\n".join(str(p) for p in searched_dirs)
+    raise FileNotFoundError(
+        "BGMフォルダまたはmp3が見つかりませんでした。次を確認してください:\n"
+        f"- 候補パスにmp3が存在するか\n{searched}\n"
+        "- 必要なら環境変数 RADIO_BGM_DIR でBGMフォルダを明示指定する"
+    )
 
 
 def convert_audio_to_mp4(audio_path: Path, video_path: Path, bgm_path: Path) -> None:

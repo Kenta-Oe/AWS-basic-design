@@ -79,6 +79,11 @@ OPENAI_API_KEY=sk-your-api-key-here
 - BGMは `C:\Users\takky\OneDrive\デスクトップ\code_work\AWS-basic-design\code\bgm` 配下の `.mp3` を使用します。
 - BGMはループ再生され、台本の読み上げが長くても途切れないようにしています。
 - ナレーションに対してBGM音量は控えめ（約12%）に調整しています。
+- 実行環境によってBGMフォルダ解決に差分が出る場合は、`RADIO_BGM_DIR` 環境変数でBGMフォルダを明示指定できます。
+
+```bash
+export RADIO_BGM_DIR="C:\Users\takky\OneDrive\デスクトップ\code_work\AWS-basic-design\code\bgm"
+```
 
 ## 台本の話すテンポについて
 
