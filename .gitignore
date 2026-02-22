@@ -14,3 +14,9 @@ secrets.py
 
 # Output files
 *.docx
+# Radio generator outputs
+code/radio/scripts/
+code/radio/audio/
+
+# Local BGM assets
+code/bgm/*.mp3
